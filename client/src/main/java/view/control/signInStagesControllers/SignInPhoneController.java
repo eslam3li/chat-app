@@ -1,0 +1,123 @@
+package view.control.signInStagesControllers;
+
+import view.control.registerStagesControllers.CreatePhoneController;
+import com.chat.common.User;
+import com.chat.utils.FieldValidationUtil;
+import controller.implementations.Controller;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+
+public class SignInPhoneController implements Initializable {
+
+    @FXML
+    private TextField phoneTXF;
+    @FXML
+    private Label createLBL;
+    @FXML
+    private Label invalidLabel;
+    @FXML
+    private Button nextButton;
+
+    @FXML
+    private Button backButton;
+
+    Stage stage;
+    Controller controller;
+
+    public SignInPhoneController(Stage stage, Controller controller) {
+        this.stage = stage;
+        this.controller = controller;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+
+        createLBL.setOnMouseClicked(value -> {
+            CreatePhoneController createAccountController = new CreatePhoneController(stage, controller);
+            FXMLLoader loader = new FXMLLoader();
+            loader.setController(createAccountController);
+            Parent root = null;
+            try {
+                root = loader.load(getClass().getResource("/fxml/registerStagesFXMLs/CreateAccount.fxml").openStream());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            Scene scene = new Scene(root, 400, 600);
+
+            scene.getStylesheets().add(getClass().getResource("/styles/application.css").toExternalForm());
+            stage.setScene(scene);
+            stage.show();
+        });
+
+        phoneTXF.setOnKeyPressed((event) -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                moveToPasswordValidation();
+            }
+        });
+
+        nextButton.setOnAction((event) -> {
+            moveToPasswordValidation();
+        });
+
+        backButton.setOnAction((event) -> {
+            goBack();
+        });
+    }
+
+    private void moveToPasswordValidation() {
+        if (FieldValidationUtil.validatePhone(phoneTXF.getText())) {
+            User user = controller.validatePhone(phoneTXF.getText());
+            if (user != null) {
+                try {
+                    SignInPasswordFXMLController signInPasswordFXMLController = new SignInPasswordFXMLController(stage, controller, user);
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setController(signInPasswordFXMLController);
+                    Parent root = loader.load(getClass().getResource("/fxml/signInStagesFXMLs/SignInPasswordFXML.fxml").openStream());
+                    Scene scene = new Scene(root, 400, 600);
+                    scene.getStylesheets().add(getClass().getResource("/styles/application.css").toExternalForm());
+                    stage.setScene(scene);
+                    stage.show();
+                } catch (IOException ex) {
+                    Logger.getLogger(SignInPhoneController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                invalidLabel.setVisible(true);
+            }
+        } else {
+            invalidLabel.setVisible(true);
+            invalidLabel.setText("Invalid phone number");
+        }
+    }
+
+    private void goBack() {
+        try {
+            RememberedAccountsFXMLController rememberedAccountsFXMLController = new RememberedAccountsFXMLController(stage, controller);
+            FXMLLoader loader = new FXMLLoader();
+            loader.setController(rememberedAccountsFXMLController);
+            Parent root = loader.load(getClass().getResource("/fxml/signInStagesFXMLs/RememberedAccountsFXML.fxml").openStream());
+            Scene scene = new Scene(root, 400, 600);
+            scene.getStylesheets().add(getClass().getResource("/styles/application.css").toExternalForm());
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException ex) {
+
+        }
+    }
+
+}
